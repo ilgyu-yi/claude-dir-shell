@@ -1,0 +1,14 @@
+# Claude Code workspace scaffolding (mounted by the eng-shell harness;
+# not part of the dir-shell source tree). When dir-shell ships its own
+# .claude/ content (agents, commands), whitelist those paths explicitly.
+.claude/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Python bytecode (lint/ Tier-2 unit)
+__pycache__/
+*.pyc
