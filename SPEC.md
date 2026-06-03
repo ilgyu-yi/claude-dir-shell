@@ -570,6 +570,67 @@ is evaluable; it does not own the evaluation event.
 `status:proposed` is **not** an Active-path state; it appears only on the manual-filing
 path (§11).
 
+### 9.1 Feedback consumption (eng→dir: challenge / completion)
+
+After filing, the execution layer can surface a finding **up** to the Initiative — a
+**challenge** (execution reality contradicts it) or a **completion** (the extracted work
+landed). eng posts this as a comment via its `/initiative-feedback` (comment-only; eng
+*escalates, it does not decide*), and a target-repo Action projects the comment marker into
+a label — `initiative:challenged` / `initiative:completion-requested` — which
+claude-orch-shell routes back to dir (R8/R9; vocabulary + routing owned by claude-orch-shell
+SPEC §3.6/§5.4). **dir is the upstream owner that adjudicates.**
+
+**The handshake.** dir is the **sole remover** of the feedback label (claude-orch-shell
+decision O11). Removing it means *"dir has adjudicated this feedback"* (not necessarily
+"agreed") — and clears claude-orch-shell's upward route. eng never removes it; the Action
+only adds it (on a *new* comment); claude-orch-shell only reads it.
+
+#### Challenge (`initiative:challenged`)
+
+A challenge says: from execution, the Initiative appears not to hold — typically the
+termination condition turned out **not** to be code-independently evaluable, or a real
+dependency / measurability / cost the planning tier could not see surfaced. dir reads the
+challenge comment and **re-judges**, with three outcomes (the choice is a strategic
+judgment — dir's, with the human steering):
+
+- **Revise** — the challenge is right. Fix the termination condition / scope and **re-run
+  the commitment-bar evaluability gate (§3.4)** on the revision, then update the filed
+  Initiative body in place. A challenge that the condition "smuggled in execution detail"
+  is exactly the §3.4 gate having let something through — revising **tightens the gate**.
+- **Defend** — the Initiative holds. Post a rebuttal comment explaining why (e.g., the
+  condition *is* evaluable as stated; eng's concern is an implementation choice, not a
+  contract flaw). The Initiative is unchanged.
+- **Retire** — no longer worth pursuing in light of the finding. Close `--reason
+  not-planned`.
+
+After **any** outcome, **remove `initiative:challenged`** — the feedback is adjudicated.
+
+#### Completion (`initiative:completion-requested`)
+
+A completion reports the extracted Directives have all landed and **requests a termination
+assessment** (eng does not assert completion). dir **evaluates the termination condition
+(§3) against eng's cited evidence — code-independently**, using the evaluation procedure
+recorded at filing (§3.4). This is the payoff of §3.2.2: dir decides done/not-done **without
+reading eng's code**. Two outcomes:
+
+- **Met** → close the Initiative `--reason completed`.
+- **Not met** → post a comment naming what the termination condition still requires; the
+  Initiative stays Active (eng may extract more and re-report).
+
+After either, **remove `initiative:completion-requested`**.
+
+This is where the dir→eng contract (§4) pays off twice: dir guaranteed an evaluable
+condition at filing, so at completion it can assess without code; and a challenge that the
+condition wasn't truly evaluable is the feedback that tightens the §3.4 gate.
+
+#### Challenge-loop cap
+
+challenge → revise → re-challenge can ping-pong. Cap it, mirroring the commitment-bar cap
+(§5.5): after **N=2** challenge→revise rounds on the same Initiative without convergence,
+dir stops auto-revising and **escalates to the human** (or marks `status:blocked` with the
+open contention recorded). The cap prevents an infinite planning↔execution loop; the human
+breaks the tie (revise differently, defend, or retire).
+
 ---
 
 ## 10. Assumptions about eng-shell (fixed external contract)
@@ -583,11 +644,19 @@ requests for eng to change):
   `initiative`/`directive` label exclusivity — so dir must never co-apply them (§2.1).
 - eng consumes an Active Initiative and produces its own Directives/execution; dir does not
   author or assume anything about eng's internal Directive flow.
+- eng surfaces execution findings **up** via `/initiative-feedback` — comment-only, led by
+  a `## Initiative challenge` / `## Initiative completion` marker (eng *escalates, does not
+  decide*; eng MISSION "Consuming Initiatives"). dir consumes these (§9.1); dir relies only
+  on eng's *existing* comment behavior, not on any eng change. (The comment→label
+  projection is claude-orch-shell-side substrate, §9.1 / claude-orch-shell SPEC §5.4.)
 
 **Deferred — would require an eng-shell change (do not act; record only):**
-- None identified this session. If a future need arises (e.g., a structured
-  machine-readable termination-condition field eng would parse), record it here and design
-  dir to satisfy the contract with eng's *current* free-text body, not a hoped-for change.
+- The **feedback-label workflow** that projects eng's `## Initiative challenge|completion`
+  comments into the `initiative:challenged` / `initiative:completion-requested` labels is
+  hosted by eng substrate (a scoped additive eng change, `claude-eng-shell#305`). This is
+  **not** dir's dependency — dir reads the comment and (separately) removes the label; the
+  label vocabulary is owned by claude-orch-shell SPEC §3.6. Recorded here only because it
+  touches eng; dir designs against eng's current comment behavior regardless.
 
 ---
 
@@ -660,6 +729,9 @@ session proves they block the end goal, per brief §2.4.)
 | D9 | Keep the four **domains** and the **domain-dispatched rubric** (§8) from the prior spec; keep **repo/standalone modes**, **target-by-address-never-cloned**, **workspace-as-archive**, **`initiative`/`directive` exclusivity**. | These were sound and independent of the recentering; salvaged wholesale (WORK_LOG 2026-06-03 salvage note). |
 | D10 | Rename workspace `drafts/` → `initiatives/` and add `research/` (§7.1). | "initiatives/" names what the tree holds; `research/` is needed now that res documents are first-class evidence (§6) and must live in the audit trail. |
 | D11 **[brief]** | claude-orch-shell sees the Initiative on **metadata only** (`initiative` label + Active state) and does **not** see res calls (§4.3, §6). | res calls are stage-internal subroutines; claude-orch-shell is type-A plumbing routing on metadata (claude-orch-shell SPEC). |
+| D12 | **dir is the sole adjudicator of eng feedback and the sole remover of the feedback label** (§9.1). On a challenge dir decides revise/defend/retire; on a completion dir decides met/not-met; either way it removes the label. | eng escalates, it does not decide (eng MISSION); the strategic decision is dir's. Sole-remover mirrors claude-orch-shell O11 — label removal is the "handled" signal that clears the upward route. |
+| D13 | **Completion is assessed via the code-independent termination condition** (§9.1); a challenge that the condition wasn't truly evaluable **tightens the §3.4 gate** rather than just being filed. | The §3.2.2 payoff: dir can decide done without reading code. And a challenge is evidence the gate let an under-evaluable condition through — the right response is to fix the gate's output, not to defend a flawed contract. |
+| D14 | **Challenge-loop cap N=2** → escalate to human / `status:blocked` (§9.1), mirroring the commitment-bar cap (§5.5). | Prevents an infinite planning↔execution ping-pong; the human breaks a genuine contention. |
 
 ---
 
@@ -676,6 +748,9 @@ session proves they block the end goal, per brief §2.4.)
   previously-local Initiatives without re-running the lifecycle?
 - Whether `Completed` evaluation should be assisted by a dir command (re-running the §3.4
   evaluation procedure) even though dir doesn't own the evaluation event (§9).
+- **Feedback-consumption tooling** (§9.1): a `dir feedback <N>` command that reads the
+  challenge/completion comment + label, runs the revise/defend/retire or completion
+  assessment, and **removes the label** — the dir-side actuator of the eng→dir edge. Tier 2.
 
 ---
 
