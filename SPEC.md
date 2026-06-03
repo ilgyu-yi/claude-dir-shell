@@ -564,7 +564,7 @@ A filed Initiative is **Active**. Its termination condition (§3) is the criteri
 
 Who evaluates the termination condition at close time is outside dir's scope (it may be the
 human, claude-orch-shell surfacing it, or eng reporting up) — but because the condition is
-code-independent (§3.2.2), any of them *can*. dir's job ends at guaranteeing the condition
+code-independent (§3.2 property 2), any of them *can*. dir's job ends at guaranteeing the condition
 is evaluable; it does not own the evaluation event.
 
 `status:proposed` is **not** an Active-path state; it appears only on the manual-filing
@@ -610,7 +610,7 @@ After **any** outcome, **remove `initiative:challenged`** — the feedback is ad
 A completion reports the extracted Directives have all landed and **requests a termination
 assessment** (eng does not assert completion). dir **evaluates the termination condition
 (§3) against eng's cited evidence — code-independently**, using the evaluation procedure
-recorded at filing (§3.4). This is the payoff of §3.2.2: dir decides done/not-done **without
+recorded at filing (§3.4). This is the payoff of §3.2 property 2: dir decides done/not-done **without
 reading eng's code**. Two outcomes:
 
 - **Met** → close the Initiative `--reason completed`.
@@ -730,7 +730,7 @@ session proves they block the end goal, per brief §2.4.)
 | D10 | Rename workspace `drafts/` → `initiatives/` and add `research/` (§7.1). | "initiatives/" names what the tree holds; `research/` is needed now that res documents are first-class evidence (§6) and must live in the audit trail. |
 | D11 **[brief]** | claude-orch-shell sees the Initiative on **metadata only** (`initiative` label + Active state) and does **not** see res calls (§4.3, §6). | res calls are stage-internal subroutines; claude-orch-shell is type-A plumbing routing on metadata (claude-orch-shell SPEC). |
 | D12 | **dir is the sole adjudicator of eng feedback and the sole remover of the feedback label** (§9.1). On a challenge dir decides revise/defend/retire; on a completion dir decides met/not-met; either way it removes the label. | eng escalates, it does not decide (eng MISSION); the strategic decision is dir's. Sole-remover mirrors claude-orch-shell O11 — label removal is the "handled" signal that clears the upward route. |
-| D13 | **Completion is assessed via the code-independent termination condition** (§9.1); a challenge that the condition wasn't truly evaluable **tightens the §3.4 gate** rather than just being filed. | The §3.2.2 payoff: dir can decide done without reading code. And a challenge is evidence the gate let an under-evaluable condition through — the right response is to fix the gate's output, not to defend a flawed contract. |
+| D13 | **Completion is assessed via the code-independent termination condition** (§9.1); a challenge that the condition wasn't truly evaluable **tightens the §3.4 gate** rather than just being filed. | The §3.2 property-2 payoff: dir can decide done without reading code. And a challenge is evidence the gate let an under-evaluable condition through — the right response is to fix the gate's output, not to defend a flawed contract. |
 | D14 | **Challenge-loop cap N=2** → escalate to human / `status:blocked` (§9.1), mirroring the commitment-bar cap (§5.5). | Prevents an infinite planning↔execution ping-pong; the human breaks a genuine contention. |
 
 ---
