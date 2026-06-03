@@ -54,11 +54,15 @@ def parse_candidate(text: str) -> Optional[TerminationConditionInput]:
     """Build a linter input from a candidate file, or None if the termination
     condition section is missing/empty.
 
-    Hints derived from the file (SPEC §2.2):
-    - scope_anchored: True when a `## Non-goals` section has ≥1 bullet (scope is
-      bounded enough to attribute the condition); None (→ REVIEW) when Non-goals is
-      absent — honest, since absence is a separate malformedness, not proof of
-      non-attribution.
+    Hints derived from the file (SPEC §2.2, §3.2 property 3):
+    - scope_anchored: `True` when a machine-detectable scope anchor is present — a
+      bulleted `## Non-goals` **or** bulleted `## Constraints` **or** an enumerated
+      termination condition (SPEC §3.2 property 3 ties attribution to "Non-goals /
+      Constraints / enumerated deliverables"). Otherwise `None` (→ REVIEW): the parser
+      **never fabricates `False`** — it cannot *assert* non-attribution from formatting.
+      Absence or prose just means "can't tell from text, ask the human"; `False` is
+      reserved for an actual reviewer override. (Returning `False` here would dishonestly
+      FAIL a SPEC-compliant prose Non-goals — worse than the honest absent → REVIEW.)
     - enumerated_deliverables: True when the termination section itself lists ≥2
       items (a closed deliverable checklist, SPEC §3.3).
     """
@@ -66,14 +70,15 @@ def parse_candidate(text: str) -> Optional[TerminationConditionInput]:
     if not term:
         return None
 
-    nongoals = extract_section(text, "Non-goals")
-    scope_anchored: Optional[bool]
-    if nongoals is None:
-        scope_anchored = None
-    else:
-        scope_anchored = _count_list_items(nongoals) >= 1
-
     enumerated = _count_list_items(term) >= 2
+    nongoals = extract_section(text, "Non-goals")
+    constraints = extract_section(text, "Constraints")
+    anchored = (_count_list_items(nongoals) >= 1
+                or _count_list_items(constraints) >= 1
+                or enumerated)
+    # True if an anchor is detectable; otherwise None (REVIEW) — never False.
+    scope_anchored: Optional[bool] = True if anchored else None
+
     return TerminationConditionInput(
         text=term,
         scope_anchored=scope_anchored,
