@@ -17,6 +17,22 @@ without interpreting content. dir-shell's central job is to **guarantee** that c
 no Initiative is filed unless its termination condition passes an explicit evaluability
 gate. See [SPEC.md](SPEC.md) §3 and §4.
 
+## Shared principle — context narrowing
+
+dir shares the system's load-bearing principle (origin:
+[claude-eng-shell MISSION](https://github.com/ilgyu-yi/claude-eng-shell/blob/main/MISSION.md)
+"The mechanism"; system statement in claude-orch-shell MISSION): **output quality is bounded
+by the size and relevance of working context** — keep the active context small and relevant
+(narrowing + selective injection), with **artifacts, not conversations, as the durable
+memory**. Every Initiative is judged against it.
+
+dir embodies it by **excluding the entire code context**: it reads only planning-tier
+artifacts (never source code, even when it could), and grounds claims in res **documents** (a
+distilled verdict, not a research transcript). Most pointedly, the **termination condition is
+itself a context boundary** between planning and execution — the artifact that lets *dir
+reason without code context* and *eng reason without strategy context*. Guaranteeing it is
+how dir keeps both tiers' working contexts small and relevant.
+
 ## What it does
 
 - **Develops Initiatives** through a review-gated lifecycle (draft → ground → survival-bar
