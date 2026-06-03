@@ -1,0 +1,134 @@
+name: Initiative proposal (manual filing)
+description: Propose an Initiative outside the development loop — a planning-tier strategic commitment. The primary path is dir-shell's review-gated development (SPEC §5); this template is the secondary manual path (SPEC §11). See MISSION.md and SPEC.md.
+title: "initiative: <one-line strategic commitment>"
+labels: [initiative, status:proposed]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An Initiative is a **planning-tier strategic commitment**, not a unit of execution. It parents zero, one, or many downstream artifacts (eng-shell Directives, experiment records, decision records, product bets).
+
+        **This template is the *manual filing* path.** The primary path is dir-shell's review-gated development loop (draft → ground → survival-bar review → commitment-bar gate → file; SPEC §5). Use this template only when retrofitting an external proposal, filing a one-off, or seeding a batch (SPEC §11). Manual filings land at `status:proposed` and **must pass the commitment-bar review — including the termination-condition evaluability gate (SPEC §3.4) — before becoming Active.** A manual filing whose termination condition fails the gate stays `status:proposed`; it never becomes Active silently.
+
+        Before filing, scan [`MISSION.md`](../blob/main/MISSION.md) and the [open Initiatives](https://github.com/ilgyu-yi/claude-dir-shell/issues?q=is%3Aopen+label%3Ainitiative) to make sure this proposal doesn't duplicate existing direction. Filing under low context-grounding (missing problem statement or current state) is grounds for immediate rejection.
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      description: Which planning-tier domain this Initiative belongs to. Determines which rubric variant the reviewer applies (SPEC §8). Required.
+      options:
+        - scientific-methodology
+        - experiment-design
+        - product-development
+        - decision-making
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One paragraph naming the strategic commitment. What outcome will this Initiative move us toward, bounded by a concrete artifact-level boundary (experiments planned, decisions framed, hypotheses tested, methodology documented) — not "explore" or "investigate" without a target.
+      placeholder: |
+        Adopt a structured experiment-design rubric for all hypothesis-testing work in the X domain over the next quarter. Concrete artifacts: docs/experiment-rubric.md committed; 3 prior open hypotheses re-filed using the rubric; one new experiment runs end-to-end under it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem (context-grounding, required)
+      description: The concrete problem this Initiative addresses. What is broken / missing / risky / underspecified right now? Cite evidence — observations, prior experiments, market data, past decisions. Do not generate this from a blank prompt. See CLAUDE.md §2.
+      placeholder: |
+        Past hypotheses in the X domain were evaluated inconsistently — some had pre-registered success thresholds, others did not. Three of the last five experiments (Issues #12, #18, #24) failed post-hoc-rationalization audits in retrospective review. Without a shared rubric, we cannot tell whether new experiments are improvements over the past pattern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Current state (context-grounding, required)
+      description: What's there now. Existing artifacts, prior attempts, known constraints, recent observations. The reviewer reads this to judge whether the Initiative is responsive to actual current conditions vs. a generic best-practice claim. See CLAUDE.md §2.
+      placeholder: |
+        - docs/experiment-rubric.md does not exist; experiment design lives ad hoc in each Issue body.
+        - Three retrospective audits exist (Issue #12, #18, #24 comments) that name specific gaps.
+        - The team has bandwidth ~4hr/wk for the next two months on this thread; broader rewrites are out of reach in that window.
+    validations:
+      required: true
+
+  - type: textarea
+    id: mission-fit
+    attributes:
+      label: MISSION fit
+      description: Which `MISSION.md` section or success criterion does this Initiative serve? One sentence. If the MISSION doesn't yet cover this and you think it should, say so honestly — the Initiative may motivate a MISSION amendment.
+      placeholder: |
+        Serves MISSION § "Success looks like > Review and screening have teeth" — codifying the rubric is the precondition for rejecting weak experimental hypotheses with specific actionable reasons rather than gut calls.
+    validations:
+      required: true
+
+  - type: textarea
+    id: termination-condition
+    attributes:
+      label: Termination condition (the contract — required)
+      description: |
+        The single load-bearing field (SPEC §3). A statement of *what done means* that is ALL FOUR of:
+        (1) Decidable — yields a clear done/not-done verdict, not "improve X";
+        (2) Code-independent — a competent non-engineer with access to the running system, its metrics, and its public artifacts could decide done/not-done WITHOUT reading source code, a diff, or a test suite;
+        (3) Attributable — tied to this Initiative's scope (via Non-goals/Constraints/enumerated deliverables) so it's clear what work counts;
+        (4) Bounded — names a reachable, stably-true end-state, not a perpetual aspiration.
+        Allowed forms: metric threshold over a window; a closed checklist of observable deliverables; a recorded decision; a concluded pre-registered experiment. NOT allowed: "PR merged", "tests pass", "function refactored" (those require code knowledge and belong below the contract boundary). Manual filings are gated on this at review time.
+      placeholder: |
+        Metric-threshold form: "New-user activation rate ≥ 40%, measured over any trailing 14-day window, sustained for one full release cycle." (Decidable: yes/no. Code-independent: read off the analytics dashboard. Attributable: scoped to the onboarding redesign in Non-goals. Bounded: a reachable, stable state.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-signals
+    attributes:
+      label: Success signals (optional leading indicators)
+      description: Optional. Leading indicators of progress that are NOT the completion gate — they may be partially met while the Initiative is still open. Distinct from the Termination condition (which is the gate). Use these for visibility, not for deciding done.
+      placeholder: |
+        - First onboarding A/B variant shipped to 10% of new users.
+        - Activation-rate dashboard instrumented and reporting daily.
+    validations:
+      required: false
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: At least 2 explicit exclusions. What this Initiative does NOT cover. Sharper non-goals tighten scope clarity and prevent the convergent reviewer from rejecting on scope creep grounds.
+      placeholder: |
+        - Does NOT cover hypothesis-testing work in domain Y (separate Initiative).
+        - Does NOT rewrite the existing decision-framework rubric; experiments only.
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: At least 1 invariant to preserve throughout the Initiative's lifetime. Mission alignment, prior commitments, resource bounds, ethical/safety constraints.
+      placeholder: |
+        - The rubric must be applicable retroactively to ≥3 of the last 5 experiments (else it overfits to one mode).
+        - Total docs effort capped at ~8hr — preserves bandwidth for downstream experiment execution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: confidence
+    attributes:
+      label: Confidence (0-100)
+      description: Self-assessment of the Initiative's quality at filing time. Lower numbers are OK — an Initiative can be filed under uncertainty as long as its **termination condition is evaluable** (the four-property gate, SPEC §3.4). Confidence is not the gate; the termination condition is. Batch generation (SPEC §12) explicitly produces low-confidence candidates for the survival/commitment-bar reviewer to weigh.
+      placeholder: "60"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional — links to prior discussions, related Initiatives, ADRs, external research.
+    validations:
+      required: false
