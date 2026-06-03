@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Thin launcher for the dir CLI (claude-dir-shell SPEC §5, §7).
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec python3 "$here/lint/dir_cli.py" "$@"
